@@ -21,7 +21,9 @@ const Chat = () => {
                 navigate("/login");
             }
             else{
-                setCurrentUser(await JSON.parse(localStorage.getItem("chat-app-user")))
+                setCurrentUser(
+                    await JSON.parse(localStorage.getItem("chat-app-user"))
+                )
                 setIsLoaded(true);
             }
         }
@@ -44,6 +46,7 @@ const Chat = () => {
     const handleChatChange = (chat)=>{
         setCurrentChat(chat);
     }
+    console.log({currentChat, currentUser})
     return (
         <Container>
             <div className={'container'}>
@@ -51,7 +54,7 @@ const Chat = () => {
                 {
                     isLoaded && currentChat === undefined ?( <Welcome currentUser={currentUser}/> ) :
                         (
-                        <ChatContainer currentChat={currentChat}/>
+                        <ChatContainer currentChat={currentChat} currentUser={currentUser}/>
                     )
                 }
             </div>

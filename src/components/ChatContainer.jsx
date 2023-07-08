@@ -1,13 +1,32 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import styled from "styled-components";
 import Logout from "./Logout";
 import ChatInput from "./ChatInput";
-import Messages from "./Messages";
+// import Messages from "./Messages";
+import {getAllMessagesRoutes, sendMessageRoutes} from "../utils/APIRoutes";
+import axios from "axios";
 
-const ChatContainer = ({currentChat}) => {
+const ChatContainer = ({currentChat, currentUser}) => {
+    const [messages, setMessages] = useState([]);
+    console.log({currentChat, currentUser})
+    useEffect(()=>{
+        const changing = async()=>{
+            const response = await axios.post(getAllMessagesRoutes, {
+                from: currentUser._id,
+                to: currentChat._id
+            })
+            setMessages(response.data);
+        }
+        changing();
+    }, [])
     const handleSendMsg = async(msg)=>{
-        alert(msg)
+        await axios.post(sendMessageRoutes, {
+            from: currentUser._id,
+            to: currentChat._id,
+            message: msg
+        })
     }
+
     return (
         <>
             {
@@ -26,7 +45,22 @@ const ChatContainer = ({currentChat}) => {
                             </div>
                             <Logout/>
                         </div>
-                        <Messages/>
+                        {/*<Messages/>*/}
+                        <div className={'chat-messages'}>
+                            {
+                                messages.map((message)=>{
+                                    return (
+                                        <div>
+                                            <div className={`message ${message.fromSelf ? "sended" : "recieved"}`}>
+                                                <div className={'content'}>
+                                                    <p>{message.message}</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })
+                            }
+                        </div>
                         <ChatInput handleSendMsg = {handleSendMsg}/>
                     </Container>
                 )
@@ -37,7 +71,14 @@ const ChatContainer = ({currentChat}) => {
 
 const Container = styled.div`
     padding-top: 1rem;
-  .chat-header{
+  display: grid;
+  grid-template-rows: 10% 78% 12%;
+  gap: 0.1rem;
+  overflow: hidden;
+  @media screen and (min-width: 720px) and (max-width: 1080px){
+    grid-auto-rows: 15% 70% 15%;
+  }
+    .chat-header{
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -56,6 +97,37 @@ const Container = styled.div`
           color: white;
         }
       }
+    }
+  }
+  .chat-messages{
+    padding 1rem 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    overflow: auto;
+    .message{
+      display: flex;
+      align-items: center;
+      .content{
+        max-width: 40%;
+        overflow-wrap: break-word;
+        padding: 1rem;
+        font-size: 1.1rem;
+        border-radius: 1rem;
+        color: white;
+      }
+    }
+  }
+  .sended{
+    justify-content: flex-end;
+    .content{
+      background-color: red;
+    }
+  }
+  .recieved{
+    justify-content: flex-start;
+    .content{
+      background-color: blue;
     }
   }
 `;
